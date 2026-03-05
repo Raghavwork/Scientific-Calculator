@@ -28,3 +28,6 @@ Thumbs.db
 
 # Git
 *.swp
+
+.gitignore
+.dockerignore
