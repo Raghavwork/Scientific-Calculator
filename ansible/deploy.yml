@@ -1,11 +1,35 @@
-- hosts: servers
-  become: yes
+---
+- name: Deploy Scientific Calculator Container
+  hosts: calculator_server
+  become: true
+
+  vars:
+    image_name: "raghav2805/scientific_calculator"
+    container_name: "scientific_calculator"
 
   tasks:
 
-    - name: Pull Docker Image
+    - name: Pull latest Docker image
+      docker_image:
+        name: "{{ image_name }}"
+        source: pull
+
+    - name: Stop existing container
       docker_container:
-        name: calculator
-        image: username/scientific-calculator
+        name: "{{ container_name }}"
+        state: stopped
+      ignore_errors: yes
+
+    - name: Remove existing container
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: Run new calculator container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
         state: started
-        tty: yes
+        tty: true
+        interactive: true
