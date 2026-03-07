@@ -20,22 +20,22 @@ pipeline {
 
         stage('Install Dependencies') {
     	    steps {
-        sh '''
-        python3 -m venv venv
-        . venv/bin/activate
-        pip install pyinstaller
-        '''
-    }
-}
+                sh '''
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install pyinstaller
+                '''
+            }
+        }
 
-stage('Build Executable') {
-    steps {
-        sh '''
-        . venv/bin/activate
-        pyinstaller --onefile calculator.py
-        '''
-    }
-}
+        stage('Build Executable') {
+            steps {
+                sh '''
+                . venv/bin/activate
+                pyinstaller --onefile calculator.py
+                '''
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
