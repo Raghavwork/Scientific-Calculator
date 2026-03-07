@@ -1,0 +1,11 @@
+- hosts: servers
+  become: yes
+
+  tasks:
+
+    - name: Pull Docker Image
+      docker_container:
+        name: calculator
+        image: username/scientific-calculator
+        state: started
+        tty: yes
