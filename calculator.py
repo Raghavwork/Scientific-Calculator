@@ -33,6 +33,7 @@ def power(x, b):
 def menu():
     while True:
         print("\nScientific Calculator")
+        print("\nChoose one option:-")
         print("1. Square Root")
         print("2. Factorial")
         print("3. Natural Log")
