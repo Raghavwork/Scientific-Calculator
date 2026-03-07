@@ -6,21 +6,21 @@ pipeline {
     }
 
     triggers {
-        pollSCM('H/1 * * * *')
+        githubPush()
     }
 
     stages {
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/raghav2805/Scientific_calculator.git'
+                git branch: 'main',
+                url: 'https://github.com/raghav2805/Scientific_calculator.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 sh '''
-                python3 -m pip install --upgrade pip
                 pip install pyinstaller
                 '''
             }
@@ -42,18 +42,42 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Login & Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub',
-                                 usernameVariable: 'USERNAME',
-                                 passwordVariable: 'PASSWORD')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
 
                     sh '''
-                    echo $PASSWORD | docker login -u $USERNAME --password-stdin
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
                     docker push $IMAGE_NAME
                     '''
                 }
             }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                sh '''
+                ansible-playbook ansible/deploy.yml -i ansible/inventory.ini
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            mail to: 'raghavgoyal492.2805@gmail.com',
+                 subject: 'Jenkins Build Success',
+                 body: 'Scientific Calculator pipeline executed successfully.'
+        }
+
+        failure {
+            mail to: 'raghavgoyal492.2805@gmail.com',
+                 subject: 'Jenkins Build Failed',
+                 body: 'Check Jenkins console output.'
         }
     }
 }
